@@ -31,10 +31,25 @@ def binary_classification_metrics(prediction, ground_truth):
         else:
             arr[0,1] += 1
 
-    precision = arr[0,0] / (arr[0,0] + arr[1,1])
-    recall = arr[0,0] / (arr[0,0] + arr[0,1])
-    accuracy = (arr[0,0] + arr[1,1]) / (arr[0,0] + arr[0,1] + arr[1,0] + arr[1,1])
-    f1 = 2 * precision * recall / (precision + recall)
+    if (arr[0,0] + arr[1,1]) != 0:
+        precision = arr[0,0] / (arr[0,0] + arr[1,1])
+    else:
+        precision = 0
+    
+    if (arr[0,0] + arr[0,1]) != 0:
+        recall = arr[0,0] / (arr[0,0] + arr[0,1])
+    else:
+        recall = 0
+
+    if ((arr[0,0] + arr[0,1] + arr[1,0] + arr[1,1])) != 0:
+        accuracy = (arr[0,0] + arr[1,1]) / (arr[0,0] + arr[0,1] + arr[1,0] + arr[1,1])
+    else:
+        accuracy = 0
+
+    if (precision + recall) != 0:
+        f1 = 2 * precision * recall / (precision + recall)
+    else:
+        f1 = 0
 
     return precision, recall, f1, accuracy
 
@@ -63,7 +78,12 @@ def multiclass_accuracy(prediction, ground_truth):
     def get_precisions():
         precisions = []
         for i in range(arr.shape[0]):
-            precision = arr[i,i] / np.sum(arr[i])
+            precision = 0
+            pr_sum = np.sum(arr[i])
+            
+            if pr_sum != 0:
+                precision = arr[i,i] / np.sum(arr[i])
+
             precisions.append(precision)
         return np.array(precisions, dtype=np.float32)
     precision = np.mean(get_precisions())
@@ -72,7 +92,9 @@ def multiclass_accuracy(prediction, ground_truth):
         recalls = []
         recalls_sum = np.apply_along_axis(lambda v: np.sum(v), 0, arr)
         for i in range(arr.shape[0]):
-            recall = arr[i,i] / recalls_sum[i]
+            recall = 0
+            if recalls_sum[i] != 0:
+                recall = arr[i,i] / recalls_sum[i]
             recalls.append(recall)
         return np.array(recalls, dtype=np.float32)
     recall = np.mean(get_recalls())
