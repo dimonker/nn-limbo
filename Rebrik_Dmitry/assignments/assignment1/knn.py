@@ -54,8 +54,9 @@ class KNN:
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
             for i_train in range(num_train):
-                # TODO: Fill dists[i_test][i_train]
-                pass
+                # Fill dists[i_test][i_train]
+                dists[i_test][i_train] = np.sum(np.abs(self.train_X[i_train] - X[i_test]))
+        return dists
 
     def compute_distances_one_loop(self, X):
         '''
@@ -73,9 +74,10 @@ class KNN:
         num_test = X.shape[0]
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
-            # TODO: Fill the whole row of dists[i_test]
+            # Fill the whole row of dists[i_test]
             # without additional loops or list comprehensions
-            pass
+            dists[i_test] = np.apply_along_axis(lambda v: np.sum(v), 1, np.abs(self.train_X - X[i_test]))
+        return dists
 
     def compute_distances_no_loops(self, X):
         '''
@@ -93,8 +95,15 @@ class KNN:
         num_test = X.shape[0]
         # Using float32 to to save memory - the default is float64
         dists = np.zeros((num_test, num_train), np.float32)
-        # TODO: Implement computing all distances with no loops!
-        pass
+        # computing all distances with no loops!
+        dists = np.apply_along_axis(
+            lambda v1: np.apply_along_axis(
+                lambda v2: np.sum(v2),
+                1,
+                np.abs(self.train_X - v1)),
+            1,
+            X)
+        return dists
 
     def predict_labels_binary(self, dists):
         '''
@@ -110,10 +119,15 @@ class KNN:
         '''
         num_test = dists.shape[0]
         pred = np.zeros(num_test, np.bool)
+
+        def min_indexes(v, k = 1):
+            return v.argsort()[:k]
+
         for i in range(num_test):
-            # TODO: Implement choosing best class based on k
+            # choosing best class based on k
             # nearest training samples
-            pass
+            indexes = min_indexes(dists[i], self.k)
+            pred[i] = round(np.mean(self.train_y[indexes]))
         return pred
 
     def predict_labels_multiclass(self, dists):
@@ -131,8 +145,18 @@ class KNN:
         num_test = dists.shape[0]
         num_test = dists.shape[0]
         pred = np.zeros(num_test, np.int)
+
+        def min_indexes(v, k = 1):
+            return v.argsort()[:k]
+
         for i in range(num_test):
-            # TODO: Implement choosing best class based on k
             # nearest training samples
-            pass
+            indexses = min_indexes(dists[i], self.k)
+            neighbors = np.zeros(10, np.int)
+            for j in indexses:
+                neighbors[self.train_y[j]] += 1
+            # TODO количество соседей могут совпадать
+            pred[i] = neighbors.argsort()[-1]
+
+ 
         return pred
