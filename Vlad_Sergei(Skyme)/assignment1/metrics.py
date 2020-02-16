@@ -28,22 +28,21 @@ def binary_classification_metrics(prediction, ground_truth):
             else:
                 fn_count += 1
     
-
-    try:
+    if prediction.shape[0] != 0:
         accuracy = (tp_count + tn_count) / prediction.shape[0]
-    except ZeroDivisionError:
+    else:
         accuracy = 0
-    try:
+    if (tp_count + fp_count) != 0:
         precision = tp_count / (tp_count + fp_count)
-    except ZeroDivisionError:
+    else:
         precision = 0
-    try:
+    if (tp_count + fn_count) != 0:
         recall = tp_count / (tp_count + fn_count)
-    except ZeroDivisionError:
+    else:
         recall = 0
-    try:
+    if (recall + precision) != 0:
         f1 = 2 * recall * precision / (recall + precision)
-    except ZeroDivisionError:
+    else:
         f1 = 0
             
     # TODO: implement metrics!
@@ -72,9 +71,9 @@ def multiclass_accuracy(prediction, ground_truth):
         if prediction[i] == ground_truth[i]:
             correct += 1
 
-    try:
+    if prediction.shape[0] != 0:
         accuracy = correct / prediction.shape[0]
-    except ZeroDivisionError:
+    else:
         accuracy = 0
 
     return accuracy
