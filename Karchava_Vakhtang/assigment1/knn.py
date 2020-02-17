@@ -1,4 +1,5 @@
 import numpy as np
+from collections import Counter
 
 
 class KNN:
@@ -53,8 +54,9 @@ class KNN:
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
             for i_train in range(num_train):
-                # TODO: Fill dists[i_test][i_train]
-                pass
+                # Fill dists[i_test][i_train]
+                dists[i_test][i_train] = np.sum(np.abs(X[i_test] - self.train_X[i_train]))
+        return dists
 
     def compute_distances_one_loop(self, X):
         '''
@@ -71,9 +73,10 @@ class KNN:
         num_test = X.shape[0]
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
-            # TODO: Fill the whole row of dists[i_test]
+            # Fill the whole row of dists[i_test]
             # without additional loops or list comprehensions
-            pass
+            dists[i_test] = np.sum(np.abs(self.train_X - X[i_test]), axis=1)
+        return dists
 
     def compute_distances_no_loops(self, X):
         '''
@@ -90,8 +93,9 @@ class KNN:
         num_test = X.shape[0]
         # Using float32 to to save memory - the default is float64
         dists = np.zeros((num_test, num_train), np.float32)
-        # TODO: Implement computing all distances with no loops!
-        pass
+        # Implement computing all distances with no loops!
+        dists = abs(X[:, None] - self.train_X).sum(axis=2)
+        return dists
 
     def predict_labels_binary(self, dists):
         '''
@@ -105,11 +109,15 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
-        pred = np.zeros(num_test, np.bool)
+        dists_sorted_list = []
         for i in range(num_test):
-            # TODO: Implement choosing best class based on k
-            # nearest training samples
-            pass
+            dists_dict = {}
+            for index, distanse in enumerate(dists[i]):
+                dists_dict[index] = distanse
+            dists_sorted = sorted(dists_dict.items(), key=lambda value: value[1])[:self.k]
+            dists_sorted_list.append([i[0] for i in dists_sorted])
+        k_labels = ([self.train_y[i].astype(int) for i in dists_sorted_list])
+        pred = [sum(i) > self.k // 2 for i in k_labels]
         return pred
 
     def predict_labels_multiclass(self, dists):
@@ -126,8 +134,21 @@ class KNN:
         num_test = dists.shape[0]
         num_test = dists.shape[0]
         pred = np.zeros(num_test, np.int)
-        for i in range(num_test):
-            # TODO: Implement choosing best class based on k
-            # nearest training samples
-            pass
+        dists_sorted_list = []
+        for n in range(num_test):
+            dists_dict = {}
+            for index, distanse in enumerate(dists[n]):
+                dists_dict[index] = distanse
+            dists_sorted = sorted(dists_dict.items(), key=lambda value: value[1])[:self.k]
+            dists_sorted_list.append([i[0] for i in dists_sorted])
+            for index_naberhoods in dists_sorted_list:
+                labels_naberhood = {}
+                for i in index_naberhoods:
+                    if self.train_y[i] in labels_naberhood:
+                        labels_naberhood[self.train_y[i]] += 1
+                    else:
+                        labels_naberhood[self.train_y[i]] = 1
+                labels_naberhood = sorted(labels_naberhood.items(), key=lambda value: value[0])[:self.k]
+                predict = labels_naberhood[0][0]
+                pred[n] = predict
         return pred

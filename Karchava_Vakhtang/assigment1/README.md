@@ -4,3 +4,11 @@
 
 ## Часть 1
 Метод К-ближайших соседей (K-neariest neighbor classifier)
+
+### Результат:
+```
+Accuracy: 0.21
+```
+
+## Часть 2
+Линейный классификатор (Linear classifier)
