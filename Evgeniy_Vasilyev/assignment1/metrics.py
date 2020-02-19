@@ -30,10 +30,25 @@ def binary_classification_metrics(prediction, ground_truth):
         if prediction[i] == False and ground_truth[i] == False:
             true_negatives += 1
     
-    precision = true_positives / (true_positives + false_positives)
-    recall = true_positives / (true_positives + false_negatives)
-    f1 = 2 * precision * recall / (precision + recall)
-    accuracy = (true_positives + true_negatives) / (true_positives + true_negatives + false_positives + false_negatives)
+    if (true_positives + false_positives) != 0:
+        precision = true_positives / (true_positives + false_positives)
+    else:
+        precision = 0
+    
+    if (true_positives + false_negatives) != 0:
+        recall = true_positives / (true_positives + false_negatives)
+    else:
+        recall = 0
+    
+    if (precision + recall) != 0:
+        f1 = 2 * precision * recall / (precision + recall)
+    else:
+        f1 = 0
+
+    if (true_positives + true_negatives + false_positives + false_negatives) != 0:
+        accuracy = (true_positives + true_negatives) / (true_positives + true_negatives + false_positives + false_negatives)
+    else:
+        accuracy = 0
     
     return precision, recall, f1, accuracy
 
