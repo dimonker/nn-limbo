@@ -32,10 +32,19 @@ def binary_classification_metrics(prediction, ground_truth):
             else:
                 TN += 1
     
-    precision = TP / (TP + FP)
-    recall = TP / (TP + FN)
-    accuracy = (TP + TN) / (TP + FN + TN + FP)
-    f1 = 2 * precision * recall / (precision + recall)
+    precision = 0
+    recall = 0
+    f1 = 0
+    accuracy = 0
+    
+    if (TP + FP) != 0:
+        precision = TP / (TP + FP)
+    if (TP + FN) != 0:        
+        recall = TP / (TP + FN)
+    if (TP + FN + TN + FP) != 0:
+        accuracy = (TP + TN) / (TP + FN + TN + FP)
+    if (precision + recall) != 0:
+        f1 = 2 * precision * recall / (precision + recall)
     return precision, recall, f1, accuracy
 
 
@@ -52,6 +61,10 @@ def multiclass_accuracy(prediction, ground_truth):
     '''
     # TODO: Implement computing accuracy
     num_samples = prediction.shape[0]
+    
+    if num_samples == 0:
+        return 0
+    
     TP_TN = 0
     for i in range(num_samples):
         if (ground_truth[i] == prediction[i]):
