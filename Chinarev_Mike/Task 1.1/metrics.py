@@ -26,13 +26,24 @@ def binary_classification_metrics(prediction, ground_truth):
         if prediction[i] == False and ground_truth[i] == True: fn += 1
         if prediction[i] == True and ground_truth[i] == False: fp += 1
             
-    accuracy = (tp + tn) / (tp + fp + fn + tn)
-    recall = tp / (tp + fn)
-    precision = tp / (tp + fp)
-    f1 = (2*precision*recall+1) / (precision + recall+1)
+    if prediction.shape[0] != 0: 
+        accuracy = (tp + tn) / (tp + fp + fn + tn)
+    else:
+        accuracy = 0
+    if (tp + fn) != 0:
+        recall = tp / (tp + fn)
+    else: 
+        recall = 0
+    if (tp + fp) != 0: 
+        precision = tp / (tp + fp)
+    else:
+        precision = 0
+    if (precision + recall) != 0:
+        f1 = (2*precision*recall) / (precision + recall)
+    else:
+        f1 = 0
     ''' 
-    В формуле выше дополнил +1 в числитель и знаменатель 
-    дабы избежать деления на ноль
+    Исправил
     '''
 
     # TODO: implement metrics!
