@@ -32,7 +32,6 @@ class KNN:
         else:
             dists = self.compute_distances_two_loops(X)
             
-
         if self.train_y.dtype == np.bool:
             return self.predict_labels_binary(dists)
         else:
@@ -116,14 +115,8 @@ class KNN:
         pred = np.zeros(num_test, np.bool)
         for i in range(num_test):
             labels = []
-            for j in range(0, self.k):
-                min_value, pos = float("inf"), 0
-                for k in range(0, len(dists[i])):
-                    if dists[i, k] < min_value:
-                        pos = k
-                        min_value = dists[i, k]
-                labels.append(self.train_y[pos])
-                dists[i, pos] = float("inf")
+            nearest_pos = np.argsort(dists[i])[:self.k]
+            labels = self.train_y[nearest_pos]
             from collections import Counter 
             pred[i] = Counter(labels).most_common(1)[0][0]
             # TODO: Implement choosing best class based on k
@@ -143,18 +136,11 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
-        num_test = dists.shape[0]
         pred = np.zeros(num_test, np.int)
         for i in range(num_test):
             labels = []
-            for j in range(0, self.k):
-                min_value, pos = float("inf"), 0
-                for k in range(0, len(dists[i])):
-                    if dists[i, k] < min_value:
-                        pos = k
-                        min_value = dists[i, k]
-                labels.append(self.train_y[pos])
-                dists[i, pos] = float("inf")
+            nearest_pos = np.argsort(dists[i])[:self.k]
+            labels = self.train_y[nearest_pos]
             from collections import Counter 
             pred[i] = Counter(labels).most_common(1)[0][0]
         return pred
