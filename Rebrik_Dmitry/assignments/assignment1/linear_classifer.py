@@ -39,7 +39,10 @@ def cross_entropy_loss(probs, target_index):
     Returns:
       loss: single value
     '''
-    return -np.log(probs[target_index])
+    if (type(target_index) == int):
+        return -np.log(probs)[target_index]
+    else:
+        return -np.mean(np.log(probs[range(len(target_index)), target_index]))
 
 
 def softmax_with_cross_entropy(predictions, target_index):
@@ -57,25 +60,17 @@ def softmax_with_cross_entropy(predictions, target_index):
       loss, single value - cross-entropy loss
       dprediction, np array same shape as predictions - gradient of predictions by loss value
     '''
-    zeros = np.zeros_like(predictions)
-    if predictions.ndim > 1:  # batch case
-      sumlog = np.log(np.exp(predictions).sum(axis=1)) 
-      x_i = np.array([predictions[i, target_index[i]] for i in range(target_index.shape[0])])
-      for i in range(target_index.shape[0]):
-        zeros[i, target_index[i]] = 1
+    sm = softmax(predictions)
+    loss = cross_entropy_loss(sm, target_index)
+    if type(target_index) == int:
+        grad = sm
+        grad[target_index] -= 1
+        return loss, grad
     else:
-      sumlog = np.log(np.exp(predictions).sum()) 
-      x_i = predictions[target_index]
-      zeros[target_index] = 1
-
-    # print(sumlog.shape, x_i.shape)
-    loss = sumlog - x_i.T
-    grad = softmax(predictions)
-    grad -= zeros
-
-    if predictions.ndim > 1:
-      grad /= predictions.shape[0]
-    return loss.mean(), grad
+        m = target_index.shape[0]
+        grad = sm
+        grad[range(m), target_index] -= 1
+        return loss, grad/m
 
 
 def l2_regularization(W, reg_strength):
