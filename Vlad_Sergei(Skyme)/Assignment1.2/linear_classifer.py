@@ -46,10 +46,10 @@ def cross_entropy_loss(probs, target_index):
     '''
     # TODO implement cross-entropy
     # Your final implementation shouldn't have any loops
-    #if (type(target_index) == int):
-    #  loss = - np.log(probs)[target_index]
-    #else:
-    loss = - np.mean(np.log(probs * target_index))
+    if (type(target_index) == int):
+      loss = - np.log(probs)[target_index]
+    else:
+      loss = - np.mean(np.log(probs[range(target_index.shape[0]),target_index]))
     
     return loss
     #raise Exception("Not implemented!")
@@ -72,32 +72,14 @@ def softmax_with_cross_entropy(predictions, target_index):
     '''
     # TODO implement softmax with cross-entropy
     # Your final implementation shouldn't have any loops
-    #if type(target_index) == type(np.array([])):
-    #  t = target_index.copy()
-    #else:
-    #  t = np.array([target_index])
-    #p = predictions.copy()
-    
-
-    #s_m = softmax(softmax(p))
-    #s_m = soft_max.reshape(-1, 1)
-    #dprediction = np.diagflat(s_m) - np.dot(s_m, s_m.T)
-    #loss = cross_entropy_loss(p, t)
-
-    #return loss, dprediction
     zeros = np.zeros_like(predictions)
     if predictions.ndim > 1:  # batch case
-      sumlog = np.log(np.exp(predictions).sum(axis=1)) 
-      x_i = np.array([predictions[i, target_index[i]] for i in range(target_index.shape[0])])
       for i in range(target_index.shape[0]):
         zeros[i, target_index[i]] = 1
     else:
-      sumlog = np.log(np.exp(predictions).sum()) 
-      x_i = predictions[target_index]
       zeros[target_index] = 1
 
-    # print(sumlog.shape, x_i.shape)
-    loss = sumlog - x_i.T
+    loss = cross_entropy_loss(softmax(predictions), target_index)
     grad = softmax(predictions)
     grad -= zeros
 
