@@ -105,6 +105,7 @@ class KNN:
         dists = abs(dists1[:, np.newaxis] - dists2)
         """
         dists = np.sum(np.abs(self.train_X[:, None] - X[None, :]), axis=2).T
+        # dists = np.sum(np.abs(self.train_X[:, np.newaxis] - X), axis=2).T
 
         return dists
 
@@ -143,7 +144,6 @@ class KNN:
         pred, np array of int (num_test_samples) - predicted class index 
            for every test sample
         '''
-        num_test = dists.shape[0]
         num_test = dists.shape[0]
         pred = np.zeros(num_test, np.int)
         k = self.k
