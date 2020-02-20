@@ -76,7 +76,7 @@ class KNN:
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
             dists[i_test] = np.sum(np.abs(self.train_X[:]-X[i_test]), axis = 1)
-            pass
+            # pass
         return dists
 
     def compute_distances_no_loops(self, X):
@@ -149,5 +149,5 @@ class KNN:
             classes_num = [int(curr_dist[i][1]) for i in range(len(curr_dist))]
             classes = [classes_num.count(i) for i in range(10)]
             pred[i] = classes.index(max(classes))
-            pass
+            # pass
         return pred
