@@ -109,15 +109,11 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
-        dists_sorted_list = []
+        pred = np.zeros(num_test, np.bool)
         for i in range(num_test):
-            dists_dict = {}
-            for index, distanse in enumerate(dists[i]):
-                dists_dict[index] = distanse
-            dists_sorted = sorted(dists_dict.items(), key=lambda value: value[1])[:self.k]
-            dists_sorted_list.append([i[0] for i in dists_sorted])
-        k_labels = ([self.train_y[i].astype(int) for i in dists_sorted_list])
-        pred = [sum(i) > self.k // 2 for i in k_labels]
+            y_indices = np.argsort(dists[i, :], axis=0)[:self.k]
+            closest_y = self.train_y[y_indices]
+            pred[i] = np.argmax(np.bincount(closest_y))
         return pred
 
     def predict_labels_multiclass(self, dists):
@@ -132,23 +128,9 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
-        num_test = dists.shape[0]
         pred = np.zeros(num_test, np.int)
-        dists_sorted_list = []
-        for n in range(num_test):
-            dists_dict = {}
-            for index, distanse in enumerate(dists[n]):
-                dists_dict[index] = distanse
-            dists_sorted = sorted(dists_dict.items(), key=lambda value: value[1])[:self.k]
-            dists_sorted_list.append([i[0] for i in dists_sorted])
-            for index_naberhoods in dists_sorted_list:
-                labels_naberhood = {}
-                for i in index_naberhoods:
-                    if self.train_y[i] in labels_naberhood:
-                        labels_naberhood[self.train_y[i]] += 1
-                    else:
-                        labels_naberhood[self.train_y[i]] = 1
-                labels_naberhood = sorted(labels_naberhood.items(), key=lambda value: value[0])[:self.k]
-                predict = labels_naberhood[0][0]
-                pred[n] = predict
+        for i in range(num_test):
+            y_indices = np.argsort(dists[i, :], axis=0)[:self.k]
+            closest_y = self.train_y[y_indices]
+            pred[i] = np.argmax(np.bincount(closest_y))
         return pred
