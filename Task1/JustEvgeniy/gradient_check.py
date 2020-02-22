@@ -43,7 +43,3 @@ def check_gradient(f, x, delta=1e-5, tol = 1e-4):
 
     print("Gradient check passed!")
     return True
-
-        
-
-        

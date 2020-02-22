@@ -161,12 +161,3 @@ class LinearSoftmaxClassifier():
         raise Exception("Not implemented!")
 
         return y_pred
-
-
-
-                
-                                                          
-
-            
-
-                
