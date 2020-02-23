@@ -29,12 +29,22 @@ def check_gradient(f, x, delta=1e-5, tol = 1e-4):
     # We will go through every dimension of x and compute numeric
     # derivative for it
     it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
+    # x = np.array(x)
     while not it.finished:
         ix = it.multi_index
         analytic_grad_at_ix = analytic_grad[ix]
         numeric_grad_at_ix = 0
 
-        # TODO compute value of numeric gradient of f to idx
+        deltas = np.zeros_like(x, np.float)
+        deltas[ix] = delta
+
+        shifted_left, _ = f(x - deltas)
+        shifted_right, _ = f(x + deltas)
+        # print("shifted right: {}, shifted left: {}".format(shifted_right, shifted_left))
+
+        numeric_grad_at_ix = (shifted_right - shifted_left)/(2*delta)
+        # print(numeric_grad_at_ix)
+
         if not np.isclose(numeric_grad_at_ix, analytic_grad_at_ix, tol):
             print("Gradients are different at %s. Analytic: %2.5f, Numeric: %2.5f" % (ix, analytic_grad_at_ix, numeric_grad_at_ix))
             return False
