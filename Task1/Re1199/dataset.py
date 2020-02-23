@@ -33,7 +33,6 @@ def load_svhn(folder, max_train, max_test):
 
     Arguments:
 
-
     Returns:
     train_X, np array (num_train, 32, 32, 3) - training images
     train_y, np array of int (num_train) - training labels
@@ -75,5 +74,3 @@ def random_split_train_val(X, y, num_val, seed=42):
     val_y = y[val_indices]
 
     return train_X, train_y, val_X, val_y
-    
-    
