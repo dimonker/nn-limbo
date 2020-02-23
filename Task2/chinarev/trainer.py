@@ -30,7 +30,6 @@ class Trainer:
                  learning_rate_decay=1.0):
         """
         Initializes the trainer
-
         Arguments:
         model - neural network model
         dataset, instance of Dataset class - data to train on
@@ -94,14 +93,19 @@ class Trainer:
             batches_indices = np.array_split(shuffled_indices, sections)
 
             batch_losses = []
-
+            
             for batch_indices in batches_indices:
                 # TODO Generate batches based on batch_indices and
                 # use model to generate loss and gradients for all
                 # the params
-
-                raise Exception("Not implemented!")
-
+                # в качестве модели - self.model !!!
+                #raise Exception("Not implemented!")
+                
+                loss = self.model.compute_loss_and_gradients(self.dataset.train_X[batch_indices], 
+                                                             self.dataset.train_y[batch_indices])  # прошли вперед, назад, 
+                                                                                                   # посчитали градиент
+                
+                
                 for param_name, param in self.model.params().items():
                     optimizer = self.optimizers[param_name]
                     param.value = optimizer.update(param.value, param.grad, self.learning_rate)
@@ -110,7 +114,8 @@ class Trainer:
 
             if np.not_equal(self.learning_rate_decay, 1.0):
                 # TODO: Implement learning rate decay
-                raise Exception("Not implemented!")
+                #raise Exception("Not implemented!")
+                self.learning_rate *= self.learning_rate_decay
 
             ave_loss = np.mean(batch_losses)
 
