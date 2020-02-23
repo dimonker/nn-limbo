@@ -55,6 +55,7 @@ class KNN:
             for i_train in range(num_test):
                 # TODO: Fill dists[i_test][i_train]
                 dists[i_test][i_train] = np.sum(np.abs(self.train_X[i_train] - X[i_test]))
+
         return dists
 
 
@@ -78,6 +79,7 @@ class KNN:
             # without additional loops or list comprehensions
 
             dists[i_test] = np.sum(np.abs(self.train_X[:] - X[i_test]), axis=1)
+
         return dists
 
 
@@ -116,14 +118,17 @@ class KNN:
         '''
         num_test = dists.shape[0]
         pred = np.zeros(num_test, np.bool)
+
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
             cur_dist = dists[i]
+
             ind = np.argsort(cur_dist)
             k_near = ind[:self.k]
             classes = self.train_y[k_near]
             pred[i] = np.bincount(classes).argmax()
+
         return pred
 
     def predict_labels_multiclass(self, dists):
@@ -142,12 +147,7 @@ class KNN:
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
-            # curr_dist = [[dists[i, j], self.train_y[j]] for j in range(dists.shape[1])]
-            # curr_dist = sorted(curr_dist, key=lambda a: a[0])[:self.k]
-            #
-            # classes_num = [int(curr_dist[i][1]) for i in range(len(curr_dist))]
-            # classes = [classes_num.count(i) for i in range(10)]
-            # pred[i] = classes.index(max(classes))
+
             cur_dist = dists[i]
             ind = np.argsort(cur_dist)
             k_near = ind[:self.k]
