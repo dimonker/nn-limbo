@@ -84,15 +84,12 @@ class TwoLayerNet:
 
         y1 = self.layer1.forward(X)
         y2 = self.layer2.forward(y1)
-        y3 = self.layer3.forward(y2)
-        probs = softmax(y3)
-        pred = np.array(list(map(lambda x: x.argsort()[-1], probs)))
+        y3 = self.layer3.forward(y2)      
+        pred = np.argmax(y3, axis = 1)
         
         return pred
 
     def params(self):
-        result = {}
-
         # TODO Implement aggregating all of the params
         result = {'W1': self.layer1.W, 'B1': self.layer1.B, 'W2': self.layer3.W, 'B2': self.layer3.B}
 

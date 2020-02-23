@@ -67,7 +67,7 @@ def l2_regularization(W, reg_strength):
       gradient, np.array same shape as W - gradient of weight by l2 loss
     """
     # DONE: Copy from the previous assignment
-    loss = reg_strength * np.sum(W**2)
+    loss = reg_strength * np.sum(np.square(W))
     grad = reg_strength * 2 * W
 
     return loss, grad
