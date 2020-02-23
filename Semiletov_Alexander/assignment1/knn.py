@@ -5,6 +5,7 @@ class KNN:
     """
     K-neariest-neighbor classifier using L1 loss
     """
+
     def __init__(self, k=1):
         self.k = k
 
@@ -15,7 +16,7 @@ class KNN:
     def predict(self, X, num_loops=0):
         '''
         Uses the KNN model to predict clases for the data samples provided
-        
+
         Arguments:
         X, np array (num_samples, num_features) - samples to run
            through the model
@@ -31,7 +32,7 @@ class KNN:
             dists = self.compute_distances_one_loop(X)
         else:
             dists = self.compute_distances_two_loops(X)
-            
+
         if self.train_y.dtype == np.bool:
             return self.predict_labels_binary(dists)
         else:
@@ -44,7 +45,7 @@ class KNN:
 
         Arguments:
         X, np array (num_test_samples, num_features) - samples to run
-        
+
         Returns:
         dists, np array (num_test_samples, num_train_samples) - array
            with distances between each test and each train sample
@@ -65,7 +66,7 @@ class KNN:
 
         Arguments:
         X, np array (num_test_samples, num_features) - samples to run
-        
+
         Returns:
         dists, np array (num_test_samples, num_train_samples) - array
            with distances between each test and each train sample
@@ -76,7 +77,7 @@ class KNN:
         for i_test in range(num_test):
             # TODO: Fill the whole row of dists[i_test]
             # without additional loops or list comprehensions
-            dists[i_test] = np.sum(np.abs(self.train_X - X[i_test]), axis = 1)
+            dists[i_test] = np.sum(np.abs(self.train_X - X[i_test]), axis=1)
         return dists
 
     def compute_distances_no_loops(self, X):
@@ -86,7 +87,7 @@ class KNN:
 
         Arguments:
         X, np array (num_test_samples, num_features) - samples to run
-        
+
         Returns:
         dists, np array (num_test_samples, num_train_samples) - array
            with distances between each test and each train sample
@@ -102,7 +103,7 @@ class KNN:
     def predict_labels_binary(self, dists):
         '''
         Returns model predictions for binary classification case
-        
+
         Arguments:
         dists, np array (num_test_samples, num_train_samples) - array
            with distances between each test and each train sample
@@ -117,7 +118,7 @@ class KNN:
             labels = []
             nearest_pos = np.argsort(dists[i])[:self.k]
             labels = self.train_y[nearest_pos]
-            from collections import Counter 
+            from collections import Counter
             pred[i] = Counter(labels).most_common(1)[0][0]
             # TODO: Implement choosing best class based on k
             # nearest training samples
@@ -126,7 +127,7 @@ class KNN:
     def predict_labels_multiclass(self, dists):
         '''
         Returns model predictions for multi-class classification case
-        
+
         Arguments:
         dists, np array (num_test_samples, num_train_samples) - array
            with distances between each test and each train sample
@@ -141,6 +142,6 @@ class KNN:
             labels = []
             nearest_pos = np.argsort(dists[i])[:self.k]
             labels = self.train_y[nearest_pos]
-            from collections import Counter 
+            from collections import Counter
             pred[i] = Counter(labels).most_common(1)[0][0]
         return pred
