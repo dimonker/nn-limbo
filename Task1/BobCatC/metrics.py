@@ -17,10 +17,22 @@ def binary_classification_metrics(prediction, ground_truth):
     false_negative = np.sum(np.logical_and(np.logical_not(prediction), ground_truth))
     false_positive = np.sum(np.logical_and(prediction, np.logical_not(ground_truth)))
 
-    precision = true_positive / (true_positive + false_positive)
-    recall = true_positive / (true_positive + false_negative)
-    accuracy = (true_positive + true_negative) / (true_positive + true_negative + false_positive + false_negative)
-    f1 = 2 * (precision * recall) / (precision + recall)
+    precision = None
+    recall = None
+    accuracy = None
+    f1 = None
+
+    if true_positive + false_positive > 0:
+        precision = true_positive / (true_positive + false_positive)
+
+    if true_positive + false_negative > 0:
+        recall = true_positive / (true_positive + false_negative)
+
+    if true_positive + true_negative + false_positive + false_negative > 0:
+        accuracy = (true_positive + true_negative) / (true_positive + true_negative + false_positive + false_negative)
+
+    if precision and recall and precision + recall > 0:
+        f1 = 2 * (precision * recall) / (precision + recall)
 
     # TODO: implement metrics!
     # Some helpful links:
