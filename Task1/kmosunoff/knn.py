@@ -54,8 +54,9 @@ class KNN:
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
             for i_train in range(num_train):
-                # TODO: Fill dists[i_test][i_train]
-                pass
+                dists[i_test][i_train] = np.sum(np.abs(self.train_X[i_train] - X[i_test]))
+
+        return dists
 
     def compute_distances_one_loop(self, X):
         '''
@@ -73,9 +74,9 @@ class KNN:
         num_test = X.shape[0]
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
-            # TODO: Fill the whole row of dists[i_test]
-            # without additional loops or list comprehensions
-            pass
+            dists[i_test] = np.sum(np.abs(self.train_X[0:] - X[i_test]), axis=1)
+
+        return dists
 
     def compute_distances_no_loops(self, X):
         '''
@@ -93,8 +94,8 @@ class KNN:
         num_test = X.shape[0]
         # Using float32 to to save memory - the default is float64
         dists = np.zeros((num_test, num_train), np.float32)
-        # TODO: Implement computing all distances with no loops!
-        pass
+        dists += np.sum(np.abs(self.train_X[np.newaxis, :] - X[:, np.newaxis]), axis=2)
+        return dists
 
     def predict_labels_binary(self, dists):
         '''
@@ -111,8 +112,11 @@ class KNN:
         num_test = dists.shape[0]
         pred = np.zeros(num_test, np.bool)
         for i in range(num_test):
-            # TODO: Implement choosing best class based on k
-            # nearest training samples
+            d = [0, 0]
+            for j in sorted(dists[i])[0: self.k]:
+                d[self.train_y[max(np.argwhere(dists[i] == j))][0].astype(int)] += 1
+                print(d)
+            pred[i] = np.argmax(d)
             pass
         return pred
 
@@ -129,10 +133,10 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
-        num_test = dists.shape[0]
-        pred = np.zeros(num_test, np.int)
+        pred = np.zeros(num_test)
         for i in range(num_test):
-            # TODO: Implement choosing best class based on k
-            # nearest training samples
-            pass
+            d = np.zeros(10)
+            for j in sorted(dists[i])[0: self.k]:
+                d[self.train_y[max(np.argwhere(dists[i] == j))][0].astype(int)] += 1
+            pred[i] = np.argmax(d, axis=0)
         return pred
