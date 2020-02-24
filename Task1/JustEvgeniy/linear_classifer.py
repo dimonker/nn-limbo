@@ -15,13 +15,13 @@ def softmax(predictions):
     '''
 #     print(' - predictions'.ljust(32), '=', predictions)
     probs = predictions - np.max(predictions)
-#     print(' - probs'.ljust(32), '=', probs)
-    probs = np.exp(probs)
-#     print(' - probs'.ljust(32), '=', probs)
-    probs /= probs.sum()
-#     print(' - probs'.ljust(32), '=', probs)
+#     print(' - predictions'.ljust(32), '=', predictions)
+    predictions = np.exp(predictions)
+#     print(' - predictions'.ljust(32), '=', predictions)
+    predictions /= predictions.sum()
+#     print(' - predictions'.ljust(32), '=', predictions)
     
-    return probs
+    return predictions
 
 
 def cross_entropy_loss(probs, target_index):
