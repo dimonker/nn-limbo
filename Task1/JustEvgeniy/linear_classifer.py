@@ -1,5 +1,7 @@
 import numpy as np
 
+import logs
+
 
 def softmax(predictions):
     '''
@@ -13,9 +15,40 @@ def softmax(predictions):
       probs, np array of the same shape as predictions - 
         probability for every class, 0..1
     '''
-    # TODO implement softmax
-    # Your final implementation shouldn't have any loops
-    raise Exception("Not implemented!")
+    logs.m('softmax')
+    logs.pr('predictions', predictions)
+    logs.pr('predictions.ndim', predictions.ndim)
+    
+    if predictions.ndim == 1:
+        probs = predictions - np.max(predictions)
+        logs.pr('predictions - np.max(predictions)', probs)
+        
+        probs = np.exp(probs)
+        logs.pr('np.exp(probs)', probs)
+        
+        probs /= probs.sum()
+        logs.pr('probs / probs.sum()', probs)
+
+        assert np.isclose(probs.sum(), 1)
+    else:
+        batch_size = predictions.shape[0]
+
+        logs.pr('np.max(predictions, axis=1).reshape(batch_size, 1)', np.max(predictions, axis=1).reshape(batch_size, 1))
+        probs = predictions - np.max(predictions, axis=1).reshape(batch_size, 1)
+        logs.pr('predictions - np.max(predictions, axis=1).reshape(batch_size, 1)', probs)
+        
+        probs = np.exp(probs)
+        logs.pr('np.exp(probs)', probs)
+        
+        logs.pr('probs.sum(axis=1).reshape(batch_size, 1)', probs.sum(axis=1).reshape(batch_size, 1))
+        probs /= probs.sum(axis=1).reshape(batch_size, 1)
+        logs.pr('probs / probs.sum(axis=1).reshape(batch_size, 1)', probs)
+
+        assert np.all(np.isclose(probs.sum(axis=1), 1))
+    
+    logs.me('softmax')
+    
+    return probs
 
 
 def cross_entropy_loss(probs, target_index):
@@ -31,9 +64,32 @@ def cross_entropy_loss(probs, target_index):
     Returns:
       loss: single value
     '''
-    # TODO implement cross-entropy
-    # Your final implementation shouldn't have any loops
-    raise Exception("Not implemented!")
+    logs.m('cross_entropy_loss')
+    logs.pr('probs', probs)
+    logs.pr('probs.ndim', probs.ndim)
+    logs.pr('target_index', target_index)
+    
+    if probs.ndim == 1:
+        logs.pr('probs[target_index]', probs[target_index])
+        logs.pr('np.log(probs[target_index])', np.log(probs[target_index]))
+        logs.pr('-np.log(probs[target_index])', -np.log(probs[target_index]))
+        
+        loss = -np.log(probs[target_index])
+    else:
+        batch_size = probs.shape[0]
+        target_index = (np.arange(batch_size), target_index.reshape(batch_size))
+        
+        logs.pr('target_index', target_index)
+        logs.pr('probs[target_index]', probs[target_index])
+        logs.pr('np.log(probs[target_index])', np.log(probs[target_index]))
+        logs.pr('-np.log(probs[target_index])', -np.log(probs[target_index]))
+        logs.pr('np.mean(-np.log(probs[target_index]))', np.mean(-np.log(probs[target_index])))
+        
+        loss = np.mean(-np.log(probs[target_index]))
+    
+    logs.me('cross_entropy_loss')
+    
+    return loss
 
 
 def softmax_with_cross_entropy(predictions, target_index):
@@ -51,9 +107,28 @@ def softmax_with_cross_entropy(predictions, target_index):
       loss, single value - cross-entropy loss
       dprediction, np array same shape as predictions - gradient of predictions by loss value
     '''
-    # TODO implement softmax with cross-entropy
-    # Your final implementation shouldn't have any loops
-    raise Exception("Not implemented!")
+    logs.m('softmax_with_cross_entropy')
+    logs.pr('predictions', predictions)
+    logs.pr('predictions.ndim', predictions.ndim)
+    logs.pr('target_index', target_index)
+    
+    probs = softmax(predictions)
+    loss = cross_entropy_loss(probs, target_index)
+    dprediction = probs.copy()
+    
+    if predictions.ndim == 1:
+        dprediction[target_index] -= 1
+    else:
+        batch_size = predictions.shape[0]
+        ti = (np.arange(batch_size), target_index.reshape(batch_size))
+        
+        logs.pr('ti', ti)
+        
+        dprediction[ti] -= 1
+    
+    logs.pr('loss', loss)
+    logs.pr('dprediction', dprediction)
+    logs.me('softmax_with_cross_entropy')
 
     return loss, dprediction
 
