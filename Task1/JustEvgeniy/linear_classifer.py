@@ -13,14 +13,33 @@ def softmax(predictions):
       probs, np array of the same shape as predictions - 
         probability for every class, 0..1
     '''
-#     print(' - predictions'.ljust(32), '=', predictions)
-    probs = predictions - np.max(predictions)
-#     print(' - probs'.ljust(32), '=', probs)
-    probs = np.exp(probs)
-#     print(' - probs'.ljust(32), '=', probs)
-    probs /= probs.sum()
-#     print(' - probs'.ljust(32), '=', probs)
+    print('softmax'.center(32))
+    print(' - predictions'.ljust(32), '=', predictions)
+    print(' - predictions.ndim'.ljust(32), '=', predictions.ndim)
+    if predictions.ndim == 1:
+        probs = predictions - np.max(predictions)
+        print(' - probs'.ljust(32), '=', probs)
+        probs = np.exp(probs)
+        print(' - probs'.ljust(32), '=', probs)
+        probs /= probs.sum()
+        print(' - probs'.ljust(32), '=', probs)
+        
+        assert np.isclose(probs.sum(), 1)
+    else:
+        batch_size = predictions.shape[0]
+        
+        print(' - np.max()'.ljust(32), '=', np.max(predictions, axis=1).reshape(batch_size, 1))
+        probs = predictions - np.max(predictions, axis=1).reshape(batch_size, 1)
+        print(' - predictions - np.max()'.ljust(32), '=', probs)
+        probs = np.exp(probs)
+        print(' - np.exp(probs)'.ljust(32), '=', probs)
+        print(' - probs.sum()'.ljust(32), '=', probs.sum(axis=1).reshape(batch_size, 1))
+        probs /= probs.sum(axis=1).reshape(batch_size, 1)
+        print(' - probs / probs.sum(axis=1)'.ljust(32), '=', probs)
+        
+        assert np.all(np.isclose(probs.sum(axis=1), 1))
     
+    print('END softmax END'.center(32))
     return probs
 
 
@@ -37,11 +56,26 @@ def cross_entropy_loss(probs, target_index):
     Returns:
       loss: single value
     '''
-#     print(' - probs'.ljust(32), '=', probs)
-#     print(' - probs[target_index]'.ljust(32), '=', probs[target_index])
-#     print(' - np.log(probs[target_index])'.ljust(32), '=', np.log(probs[target_index]))
-#     print(' - -np.log(probs[target_index])'.ljust(32), '=', -np.log(probs[target_index]))
-    return -np.log(probs[target_index])
+    print('cross_entropy_loss'.center(32))
+    print(' - probs'.ljust(32), '=', probs)
+    print(' - probs.ndim'.ljust(32), '=', probs.ndim)
+    print(' - target_index'.ljust(32), '=', target_index)
+    if probs.ndim == 1:
+        print(' - probs[target_index]'.ljust(32), '=', probs[target_index])
+        print(' - np.log(probs[target_index])'.ljust(32), '=', np.log(probs[target_index]))
+        print(' - -np.log(probs[target_index])'.ljust(32), '=', -np.log(probs[target_index]))
+        print('END cross_entropy_loss END'.center(32))
+        return -np.log(probs[target_index])
+    else:
+        batch_size = probs.shape[0]
+        target_index = [np.arange(batch_size), target_index.reshape(batch_size)]
+        print(' - target_index'.ljust(32), '=', target_index)
+        print(' - probs[target_index]'.ljust(32), '=', probs[target_index])
+        print(' - np.log(probs[target_index])'.ljust(32), '=', np.log(probs[target_index]))
+        print(' - -np.log(probs[target_index])'.ljust(32), '=', -np.log(probs[target_index]))
+        print(' - np.mean(-np.log(probs[target_index]))'.ljust(32), '=', np.mean(-np.log(probs[target_index])))
+        print('END cross_entropy_loss END'.center(32))
+        return np.mean(-np.log(probs[target_index]))
 
 
 def softmax_with_cross_entropy(predictions, target_index):
@@ -59,11 +93,26 @@ def softmax_with_cross_entropy(predictions, target_index):
       loss, single value - cross-entropy loss
       dprediction, np array same shape as predictions - gradient of predictions by loss value
     '''
+    print('softmax_with_cross_entropy'.center(32))
+    print(' - predictions'.ljust(32), '=', predictions)
+    print(' - predictions.ndim'.ljust(32), '=', predictions.ndim)
+    print(' - target_index'.ljust(32), '=', target_index)
+    
     probs = softmax(predictions)
-    dprediction = probs.copy()
-    dprediction[target_index] -= 1
     loss = cross_entropy_loss(probs, target_index)
-
+    dprediction = probs.copy()
+    if predictions.ndim == 1:
+        dprediction[target_index] -= 1
+    else:
+        batch_size = predictions.shape[0]
+        
+        ti = [np.arange(batch_size), target_index.reshape(batch_size)]
+        print(' - ti'.ljust(32), '=', ti)
+        dprediction[ti] -= 1
+        
+    print(' - dprediction'.ljust(32), '=', dprediction)
+    print(' - loss'.ljust(32), '=', loss)
+    print('END softmax_with_cross_entropy END'.center(32))
     return loss, dprediction
 
 
