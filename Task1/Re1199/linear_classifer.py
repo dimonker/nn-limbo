@@ -50,7 +50,7 @@ def cross_entropy_loss(probs, target_index):
     if type(target_index) == int:
         return -np.log(probs[target_index])
     else:
-        return - np.mean(np.log(probs[range(len(target_index)), target_index]))
+        return -np.mean(np.log(probs[range(len(target_index)), target_index]))
 
 
 def softmax_with_cross_entropy(predictions, target_index):
