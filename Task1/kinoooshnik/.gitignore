@@ -11,3 +11,4 @@ requirements.txt
 ..gitignore.un~
 .gitignore~
 .jupyter_symlinks/
+.idea/
