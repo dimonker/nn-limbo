@@ -33,18 +33,18 @@ def check_gradient(f, x, delta=1e-5, tol = 1e-4):
         ix = it.multi_index
         analytic_grad_at_ix = analytic_grad[ix]
         
-        xplus = x.copy()
-        xplus[ix] += delta
-        xminux = x.copy()
-        xminux[ix] -= delta
-        fxplus, _ = f(xplus)
-        fxminus, _ = f(xminux)
-        if isinstance(fxplus, np.ndarray):
-            numeric_grad_at_ix = (fxplus[0] - fxminus[0]) / (2 * delta)
-        else:
-            numeric_grad_at_ix = (fxplus - fxminus) / (2 * delta)
+        leftarg = x.copy()
+        leftarg[ix] += delta
+        rightarg = x.copy()
+        rightarg[ix] -= delta
+        fxleft, _ = f(leftarg)
+        fxright, _ = f(rightarg)
 
-        # TODO compute value of numeric gradient of f to idx
+        if isinstance(fxleft, float):
+            numeric_grad_at_ix = (((fxleft - fxright) / (2 * delta)))
+        else:
+            numeric_grad_at_ix = (((fxleft[ix[0]] - fxright[ix[0]]) / (2 * delta)))
+      
         if not np.isclose(numeric_grad_at_ix, analytic_grad_at_ix, tol):
             print("Gradients are different at %s. Analytic: %2.5f, Numeric: %2.5f" % (ix, analytic_grad_at_ix, numeric_grad_at_ix))
             return False
