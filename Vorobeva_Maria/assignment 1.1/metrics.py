@@ -21,6 +21,7 @@ def binary_classification_metrics(prediction, ground_truth):
     
     TN, FN, TP, FP = 0, 0, 0, 0
     num_test = prediction.shape[0]
+    
     for i in range(num_test):
         if ground_truth[i]:
             if prediction[i]: TP+=1
@@ -29,10 +30,16 @@ def binary_classification_metrics(prediction, ground_truth):
             if prediction[i]: FP+=1
             else: TN+=1
     
-    precision = TP / (TP + FP)
-    recall = TP / (TP + FN)
-    accuracy = (TP + TN) / (TP + FN + TN + FP)
-    f1 = 2 * precision * recall / (precision + recall)
+    try:
+        precision = TP / (TP + FP)
+        recall = TP / (TP + FN)
+        accuracy = (TP + TN) / (TP + FN + TN + FP)
+        f1 = 2 * precision * recall / (precision + recall)
+    
+    except Exception as e:
+        print('Ошибка:', e, '\n')
+
+    
     return precision, recall, f1, accuracy
 
 
