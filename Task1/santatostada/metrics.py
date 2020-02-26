@@ -51,8 +51,7 @@ def binary_classification_metrics(prediction, ground_truth):
             f1 = 0
 
         
-    
-     return precision, recall, f1, accuracy
+    return precision, recall, f1, accuracy
 
 
 def multiclass_accuracy(prediction, ground_truth):
