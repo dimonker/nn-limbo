@@ -39,7 +39,7 @@ class KNN:
 
     def compute_distances_two_loops(self, X):
         '''
-        Computes L1 distance from every sample of X to every training sample
+        Computes distance from every sample of X to every training sample
         Uses simplest implementation with 2 Python loops
 
         Arguments:
@@ -54,12 +54,13 @@ class KNN:
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
             for i_train in range(num_train):
-                # TODO: Fill dists[i_test][i_train]
-                pass
+                dists[i_test, i_train] = np.sum(abs(X[i_test] - self.train_X[i_train]))
+        
+        return dists
 
     def compute_distances_one_loop(self, X):
         '''
-        Computes L1 distance from every sample of X to every training sample
+        Computes distance from every sample of X to every training sample
         Vectorizes some of the calculations, so only 1 loop is used
 
         Arguments:
@@ -74,13 +75,14 @@ class KNN:
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
             # TODO: Fill the whole row of dists[i_test]
-            # without additional loops or list comprehensions
-            pass
+            # without additional loops
+            dists[i_test] = np.sum(abs(self.train_X - X[i_test]), axis=1)
+        return dists
 
     def compute_distances_no_loops(self, X):
         '''
-        Computes L1 distance from every sample of X to every training sample
-        Fully vectorizes the calculations using numpy
+        Computes distance from every sample of X to every training sample
+        Fully vectorizes the calculations
 
         Arguments:
         X, np array (num_test_samples, num_features) - samples to run
@@ -94,7 +96,10 @@ class KNN:
         # Using float32 to to save memory - the default is float64
         dists = np.zeros((num_test, num_train), np.float32)
         # TODO: Implement computing all distances with no loops!
-        pass
+        dists = abs(X[:,None] - self.train_X).sum(axis=2)
+
+        
+        return dists
 
     def predict_labels_binary(self, dists):
         '''
@@ -110,10 +115,16 @@ class KNN:
         '''
         num_test = dists.shape[0]
         pred = np.zeros(num_test, np.bool)
+        dists_sorted_list = []
+        k_labels = []
         for i in range(num_test):
-            # TODO: Implement choosing best class based on k
-            # nearest training samples
-            pass
+            dists_dict = {}
+            for index, distanse in enumerate(dists[i]):
+                dists_dict[index] = distanse
+            dists_sorted=sorted(dists_dict.items(), key=lambda value: value[1])[:self.k]
+            dists_sorted_list.append([i[0] for i in dists_sorted])
+        k_labels = ([self.train_y[i].astype(int) for i in dists_sorted_list])
+        pred = [sum(i) > self.k // 2 for i in k_labels ]
         return pred
 
     def predict_labels_multiclass(self, dists):
@@ -131,8 +142,24 @@ class KNN:
         num_test = dists.shape[0]
         num_test = dists.shape[0]
         pred = np.zeros(num_test, np.int)
-        for i in range(num_test):
-            # TODO: Implement choosing best class based on k
-            # nearest training samples
-            pass
+        dists_sorted_list = []
+        for n in range(num_test):
+
+            dists_dict = {}
+            for index, distanse in enumerate(dists[n]):
+                dists_dict[index] = distanse
+            dists_sorted=sorted(dists_dict.items(), key=lambda value: value[1])[:self.k]
+            dists_sorted_list.append([i[0] for i in dists_sorted])
+            
+            for index_naberhoods in dists_sorted_list:
+                labels_naberhood = {}
+                for i in index_naberhoods:
+                   
+                    if self.train_y[i] in labels_naberhood:
+                        labels_naberhood[self.train_y[i]] += 1
+                    else:
+                        labels_naberhood[self.train_y[i]] = 1
+                labels_naberhood = sorted(labels_naberhood.items(), key=lambda value: value[0])[:self.k]
+                predict = labels_naberhood[0][0]
+            pred[n] = predict
         return pred
