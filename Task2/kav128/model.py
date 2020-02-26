@@ -17,8 +17,9 @@ class TwoLayerNet:
         reg, float - L2 regularization strength
         """
         self.reg = reg
-        # TODO Create necessary layers
-        raise Exception("Not implemented!")
+        self.layer1 = FullyConnectedLayer(n_input, hidden_layer_size)
+        self.ReLULayer1 = ReLULayer()
+        self.layer2 = FullyConnectedLayer(hidden_layer_size, n_output)
 
     def compute_loss_and_gradients(self, X, y):
         """
@@ -29,18 +30,20 @@ class TwoLayerNet:
         X, np array (batch_size, input_features) - input data
         y, np array of int (batch_size) - classes
         """
-        # Before running forward and backward pass through the model,
-        # clear parameter gradients aggregated from the previous pass
-        # TODO Set parameter gradient to zeros
-        # Hint: using self.params() might be useful!
-        raise Exception("Not implemented!")
         
-        # TODO Compute loss and fill param gradients
-        # by running forward and backward passes through the model
-        
-        # After that, implement l2 regularization on all params
-        # Hint: self.params() is useful again!
-        raise Exception("Not implemented!")
+        params = self.params()
+        for key in params.keys():
+            params[key].grad = np.zeros_like(params[key].value)
+            out1 = self.ReLULayer1.forward(self.layer1.forward(X))
+        out2 = self.layer2.forward(out1)
+        loss, grad = softmax_with_cross_entropy(out2, y)
+        for key in params.keys():
+            l2_loss, l2_grad = l2_regularization(params[key].value, self.reg)
+            loss += l2_loss
+            params[key].grad += l2_grad
+        d_out2 = self.layer2.backward(grad)
+        self.layer1.backward(self.ReLULayer1.backward(d_out2))
+
 
         return loss
 
@@ -54,19 +57,18 @@ class TwoLayerNet:
         Returns:
           y_pred, np.array of int (test_samples)
         """
-        # TODO: Implement predict
-        # Hint: some of the code of the compute_loss_and_gradients
-        # can be reused
-        pred = np.zeros(X.shape[0], np.int)
-
-        raise Exception("Not implemented!")
+        
+        out1 = self.ReLULayer1.forward(self.layer1.forward(X))
+        out2 = self.layer2.forward(out1)
+        pred = out2.argmax(axis=1)
         return pred
 
     def params(self):
         result = {}
 
-        # TODO Implement aggregating all of the params
-
-        raise Exception("Not implemented!")
+        result['W1'] = self.layer1.W
+        result['B1'] = self.layer1.B
+        result['W2'] = self.layer2.W
+        result['B2'] = self.layer2.B
 
         return result
