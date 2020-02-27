@@ -18,10 +18,12 @@ def check_gradient(f, x, delta=1e-5, tol=1e-4):
     assert isinstance(x, np.ndarray)
     assert x.dtype == np.float
 
+    orig_x = x.copy()
     fx, analytic_grad = f(x)
-    analytic_grad = analytic_grad.copy()
+    assert np.all(np.isclose(orig_x, x, tol)), "Functions shouldn't modify input variables"
 
     assert analytic_grad.shape == x.shape
+    analytic_grad = analytic_grad.copy()
 
     it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
     while not it.finished:
