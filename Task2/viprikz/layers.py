@@ -24,7 +24,7 @@ def softmax_with_cross_entropy(preds, target_index):
     including the gradient
 
     Arguments:
-      predictions, np array, shape is either (N) or (batch_size, N) -
+      predictions, np array, shape is either (N) or (N, batch_size) -
         classifier output
       target_index: np array of int, shape is (1) or (batch_size) -
         index of the true class for given sample(s)
@@ -49,6 +49,13 @@ class Param:
         self.value = value
         self.grad = np.zeros_like(value)
 
+# @np.vectorize
+# def ReLU(x):
+#     return x if x > 0 else 0
+
+def ReLU(X):
+    return (X + np.abs(X)) / 2
+
 
 class ReLULayer:
     def __init__(self):
@@ -58,8 +65,10 @@ class ReLULayer:
         # TODO: Implement forward pass
         # Hint: you'll need to save some information about X
         # to use it later in the backward pass
-        raise Exception("Not implemented!")
-
+        self.x = X
+        result = ReLU(X)
+        return result
+    
     def backward(self, d_out):
         """
         Backward pass
@@ -74,7 +83,8 @@ class ReLULayer:
         """
         # TODO: Implement backward pass
         # Your final implementation shouldn't have any loops
-        raise Exception("Not implemented!")
+        d = np.vectorize(lambda x: 1 if x != 0 else 0)(ReLU(self.x))
+        d_result = d_out * d
         return d_result
 
     def params(self):
@@ -84,14 +94,17 @@ class ReLULayer:
 
 class FullyConnectedLayer:
     def __init__(self, n_input, n_output):
-        self.W = Param(0.001 * np.random.randn(n_input, n_output))
-        self.B = Param(0.001 * np.random.randn(1, n_output))
+        self.a = 1 / np.sqrt(n_input / 2)
+        self.W = Param(self.a * np.random.randn(n_input, n_output))
+        self.B = Param(self.a * np.random.randn(1, n_output))
         self.X = None
 
     def forward(self, X):
         # TODO: Implement forward pass
         # Your final implementation shouldn't have any loops
-        raise Exception("Not implemented!")
+        self.X = X
+        result = np.dot(X, self.W.value) + self.B.value
+        return result
 
     def backward(self, d_out):
         """
@@ -111,12 +124,14 @@ class FullyConnectedLayer:
         # Compute both gradient with respect to input
         # and gradients with respect to W and B
         # Add gradients of W and B to their `grad` attribute
-
+        
         # It should be pretty similar to linear classifier from
         # the previous assignment
-
-        raise Exception("Not implemented!")
-
+        
+        self.W.grad = np.dot(self.X.T, d_out)
+        self.B.grad = d_out
+        
+        d_input = np.dot(d_out, self.W.value.T)
         return d_input
 
     def params(self):

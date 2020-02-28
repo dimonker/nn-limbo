@@ -15,12 +15,14 @@ def check_gradient(f, x, delta=1e-5, tol = 1e-4):
     Return:
       bool indicating whether gradients match or not
     '''
-    
+
     assert isinstance(x, np.ndarray)
     assert x.dtype == np.float
     
     orig_x = x.copy()
     fx, analytic_grad = f(x)
+    # print(fx)
+    # print(orig_x, x)
     assert np.all(np.isclose(orig_x, x, tol)), "Functions shouldn't modify input variables"
 
     assert analytic_grad.shape == x.shape
@@ -32,7 +34,13 @@ def check_gradient(f, x, delta=1e-5, tol = 1e-4):
     while not it.finished:
         ix = it.multi_index
         analytic_grad_at_ix = analytic_grad[ix]
-        numeric_grad_at_ix = 0
+        # numeric_grad_at_ix = (f(x[ix] + delta)[0] - f(x[ix]-delta)[0])/(2*delta) #(f(x[ix]+delta)-f(x[ix]))/delta 
+        # print(numeric_grad_at_ix)
+        x_delta_plus = x.copy()
+        x_delta_minus = x.copy()
+        x_delta_plus[ix] += delta
+        x_delta_minus[ix] -= delta
+        numeric_grad_at_ix =( f(x_delta_plus)[0] - f(x_delta_minus)[0])/(2*delta)
 
         # TODO compute value of numeric gradient of f to idx
         if not np.isclose(numeric_grad_at_ix, analytic_grad_at_ix, tol):
@@ -42,7 +50,7 @@ def check_gradient(f, x, delta=1e-5, tol = 1e-4):
         it.iternext()
 
     print("Gradient check passed!")
-    return True
+    return []
 
         
 

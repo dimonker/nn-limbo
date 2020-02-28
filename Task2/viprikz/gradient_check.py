@@ -19,7 +19,6 @@ def check_gradient(f, x, delta=1e-5, tol=1e-4):
     assert x.dtype == np.float
 
     fx, analytic_grad = f(x)
-    analytic_grad = analytic_grad.copy()
 
     assert analytic_grad.shape == x.shape
 
@@ -27,10 +26,14 @@ def check_gradient(f, x, delta=1e-5, tol=1e-4):
     while not it.finished:
         ix = it.multi_index
         analytic_grad_at_ix = analytic_grad[ix]
-        numeric_grad_at_ix = 0
-
-        # TODO Copy from previous assignment
-        raise Exception("Not implemented!")
+        
+        d = np.zeros_like(x, np.float)
+        d[ix] = delta
+        
+        fx_p_delta, _ = f(x + d)
+        fx_m_delta, _ = f(x - d)
+        
+        numeric_grad_at_ix = (fx_p_delta - fx_m_delta) / (2 * delta)
 
         if not np.isclose(numeric_grad_at_ix, analytic_grad_at_ix, tol):
             print("Gradients are different at %s. Analytic: %2.5f, Numeric: %2.5f" % (
@@ -85,8 +88,15 @@ def check_layer_param_gradient(layer, x,
     Returns:
       bool indicating whether gradients match or not
     """
+    
+    batch_size, n_input = x.shape
+    
     param = layer.params()[param_name]
-    initial_w = param.value
+    
+    if param_name == 'B':
+        initial_w = np.vstack((param.value.copy(),)*batch_size)
+    else:
+        initial_w = param.value
 
     output = layer.forward(x)
     output_weight = np.random.randn(*output.shape)
@@ -124,7 +134,11 @@ def check_model_gradient(model, X, y,
         print("Checking gradient for %s" % param_key)
         param = params[param_key]
         initial_w = param.value
-
+        
+        batch_size = X.shape[0]
+        if 'B' in param_key:
+            initial_w = np.vstack((initial_w.copy(),)*batch_size)
+            
         def helper_func(w):
             param.value = w
             loss = model.compute_loss_and_gradients(X, y)
@@ -133,5 +147,4 @@ def check_model_gradient(model, X, y,
 
         if not check_gradient(helper_func, initial_w, delta, tol):
             return False
-
     return True

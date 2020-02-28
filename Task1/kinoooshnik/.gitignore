@@ -1,0 +1,14 @@
+data/
+download_data.sh
+env/
+gradient_check.py
+linear_classifer.py
+Linear classifier.ipynb
+__pycache__/
+README.md
+requirements.txt
+.ipynb_checkpoints/
+..gitignore.un~
+.gitignore~
+.jupyter_symlinks/
+.idea/

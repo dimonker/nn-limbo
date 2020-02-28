@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def l2_regularization(W, reg_strength):
     """
     Computes L2 regularization loss on weights and its gradient
@@ -13,9 +12,32 @@ def l2_regularization(W, reg_strength):
       loss, single value - l2 regularization loss
       gradient, np.array same shape as W - gradient of weight by l2 loss
     """
-    # TODO: Copy from the previous assignment
-    raise Exception("Not implemented!")
+    loss = reg_strength * np.linalg.norm(W)**2
+    grad = reg_strength * 2 * W
+
     return loss, grad
+
+def softmax(predictions):
+    pred = predictions.copy()
+    if predictions.ndim == 1:
+      pred -= np.max(pred)
+      return np.exp(pred) / np.sum(np.exp(pred))
+    else:
+      pred -= np.max(predictions, axis=1).reshape(-1, 1)
+      return np.exp(pred)/np.sum(np.exp(pred), axis=1).reshape(-1, 1)
+    
+
+def cross_entropy_loss(probs, target_index):
+    if probs.ndim == 1:
+      return -np.log(probs[target_index])
+    else:
+      loss = 0
+
+      for i in range(probs.shape[0]):
+        loss -= np.log(probs[i, target_index[i]])
+      # return -np.mean(np.log(probs[np.arange(probs.shape[0]), target_index]))
+      return loss/probs.shape[0]
+
 
 
 def softmax_with_cross_entropy(preds, target_index):
@@ -33,10 +55,16 @@ def softmax_with_cross_entropy(preds, target_index):
       loss, single value - cross-entropy loss
       dprediction, np array same shape as predictions - gradient of predictions by loss value
     """
-    # TODO: Copy from the previous assignment
-    raise Exception("Not implemented!")
+    s = softmax(preds)
+    loss = cross_entropy_loss(s, target_index)
 
-    return loss, d_preds
+    if preds.ndim == 1: 
+      s[target_index] -= 1
+    else:
+      for i in range(s.shape[0]):
+        s[i, target_index[i]] -= 1
+      s /= s.shape[0]
+    return loss, s
 
 
 class Param:
@@ -55,10 +83,9 @@ class ReLULayer:
         pass
 
     def forward(self, X):
-        # TODO: Implement forward pass
-        # Hint: you'll need to save some information about X
-        # to use it later in the backward pass
-        raise Exception("Not implemented!")
+        self.X = X
+        pred = np.maximum(0, X)
+        return pred
 
     def backward(self, d_out):
         """
@@ -72,9 +99,7 @@ class ReLULayer:
         d_result: np array (batch_size, num_features) - gradient
           with respect to input
         """
-        # TODO: Implement backward pass
-        # Your final implementation shouldn't have any loops
-        raise Exception("Not implemented!")
+        d_result = d_out * (self.X >= 0)
         return d_result
 
     def params(self):
@@ -89,9 +114,9 @@ class FullyConnectedLayer:
         self.X = None
 
     def forward(self, X):
-        # TODO: Implement forward pass
-        # Your final implementation shouldn't have any loops
-        raise Exception("Not implemented!")
+        self.X = X
+        pred = np.dot(X, self.W.value) + self.B.value
+        return pred
 
     def backward(self, d_out):
         """
@@ -107,15 +132,9 @@ class FullyConnectedLayer:
         d_result: np array (batch_size, n_input) - gradient
           with respect to input
         """
-        # TODO: Implement backward pass
-        # Compute both gradient with respect to input
-        # and gradients with respect to W and B
-        # Add gradients of W and B to their `grad` attribute
-
-        # It should be pretty similar to linear classifier from
-        # the previous assignment
-
-        raise Exception("Not implemented!")
+        self.W.grad = np.dot(self.X.T, d_out)
+        self.B.grad = np.sum(d_out, axis=0)[:, np.newaxis].T
+        d_input = np.dot(d_out, self.W.value.T)
 
         return d_input
 
