@@ -27,14 +27,15 @@ def check_gradient(f, x, delta=1e-5, tol=1e-4):
     while not it.finished:
         ix = it.multi_index
         analytic_grad_at_ix = analytic_grad[ix]
-        numeric_grad_at_ix = 0
 
-        # TODO Copy from previous assignment
-        raise Exception("Not implemented!")
+        x_left = x.copy()
+        x_right = x.copy()
+        x_left[ix] += delta
+        x_right[ix] -= delta
+        numeric_grad_at_ix = (f(x_left)[0] - f(x_right)[0]) / (2 * delta)
 
         if not np.isclose(numeric_grad_at_ix, analytic_grad_at_ix, tol):
-            print("Gradients are different at %s. Analytic: %2.5f, Numeric: %2.5f" % (
-                  ix, analytic_grad_at_ix, numeric_grad_at_ix))
+            print("Gradients are different at %s. Analytic: %2.5f, Numeric: %2.5f" % (ix, analytic_grad_at_ix, numeric_grad_at_ix))
             return False
 
         it.iternext()
@@ -69,9 +70,7 @@ def check_layer_gradient(layer, x, delta=1e-5, tol=1e-4):
     return check_gradient(helper_func, x, delta, tol)
 
 
-def check_layer_param_gradient(layer, x,
-                               param_name,
-                               delta=1e-5, tol=1e-4):
+def check_layer_param_gradient(layer, x, param_name, delta=1e-5, tol=1e-4):
     """
     Checks gradient correctness for the parameter of the layer
 
@@ -103,8 +102,7 @@ def check_layer_param_gradient(layer, x,
     return check_gradient(helper_func, initial_w, delta, tol)
 
 
-def check_model_gradient(model, X, y,
-                         delta=1e-5, tol=1e-4):
+def check_model_gradient(model, X, y, delta=1e-5, tol=1e-4):
     """
     Checks gradient correctness for all model parameters
 
