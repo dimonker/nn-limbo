@@ -1,4 +1,0 @@
-__pycache__
-data
-download_data.sh
-dataset.py
