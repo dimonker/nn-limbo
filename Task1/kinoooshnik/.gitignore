@@ -10,3 +10,5 @@ requirements.txt
 .ipynb_checkpoints/
 ..gitignore.un~
 .gitignore~
+.jupyter_symlinks/
+.idea/
