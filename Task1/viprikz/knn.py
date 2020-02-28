@@ -1,5 +1,8 @@
-import numpy as np
+from builtins import sorted
 
+import numpy as np
+from scipy import stats
+from collections import Counter
 
 class KNN:
     """
@@ -25,13 +28,12 @@ class KNN:
         predictions, np array of ints (num_samples) - predicted class
            for each sample
         '''
-        if num_loops == 0:
-            dists = self.compute_distances_no_loops(X)
-        elif num_loops == 1:
-            dists = self.compute_distances_one_loop(X)
-        else:
-            dists = self.compute_distances_two_loops(X)
-
+        # if num_loops == 0:
+        #    dists = self.compute_distances_no_loops(X)
+        #elif num_loops == 1:
+        #    dists = self.compute_distances_one_loop(X)
+        # else:
+        dists = self.compute_distances_two_loops(X)
         if self.train_y.dtype == np.bool:
             return self.predict_labels_binary(dists)
         else:
@@ -54,8 +56,8 @@ class KNN:
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
             for i_train in range(num_train):
-                # TODO: Fill dists[i_test][i_train]
-                pass
+                dists[i_test][i_train] = np.sum(abs(self.train_X[i_train:i_train+1] - X[i_test:i_test+1]))
+        return dists
 
     def compute_distances_one_loop(self, X):
         '''
@@ -69,17 +71,17 @@ class KNN:
         dists, np array (num_test_samples, num_train_samples) - array
            with distances between each test and each train sample
         '''
+
         num_train = self.train_X.shape[0]
         num_test = X.shape[0]
         dists = np.zeros((num_test, num_train), np.float32)
         for i_test in range(num_test):
-            # TODO: Fill the whole row of dists[i_test]
-            # without additional loops or list comprehensions
-            pass
+            dists[i_test] = list(map(lambda x: np.sum(np.abs(X[i_test] - x)), self.train_X))
+        return dists
 
     def compute_distances_no_loops(self, X):
-        '''
-        Computes L1 distance from every sample of X to every training sample
+        
+        '''Computes L1 distance from every sample of X to every training sample
         Fully vectorizes the calculations using numpy
 
         Arguments:
@@ -88,13 +90,15 @@ class KNN:
         Returns:
         dists, np array (num_test_samples, num_train_samples) - array
            with distances between each test and each train sample
-        '''
+        # Using float32 to to save memory - the default is float64
+        dists = np.zeros((num_test, num_train), np.float32)
+        # TODO: Implement computing all distances with no loops!'''
         num_train = self.train_X.shape[0]
         num_test = X.shape[0]
         # Using float32 to to save memory - the default is float64
         dists = np.zeros((num_test, num_train), np.float32)
-        # TODO: Implement computing all distances with no loops!
-        pass
+        dists = list(map(lambda x: np.sum(np.abs(self.train_X - x), axis=1), X))
+        return np.array(dists)
 
     def predict_labels_binary(self, dists):
         '''
@@ -109,12 +113,17 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
+        num_train = dists.shape[1]
         pred = np.zeros(num_test, np.bool)
         for i in range(num_test):
-            # TODO: Implement choosing best class based on k
-            # nearest training samples
-            pass
+            ind = np.argsort(dists[i])[:self.k]
+            res = 0
+            for j in ind:
+                res += self.train_y[j]
+            pred[i] = res >= self.k // 2 + 1
+
         return pred
+
 
     def predict_labels_multiclass(self, dists):
         '''
@@ -129,10 +138,19 @@ class KNN:
            for every test sample
         '''
         num_test = dists.shape[0]
-        num_test = dists.shape[0]
+        num_train = dists.shape[1]
         pred = np.zeros(num_test, np.int)
         for i in range(num_test):
             # TODO: Implement choosing best class based on k
             # nearest training samples
-            pass
+            ind = np.argsort(dists[i])[:self.k]
+            res = []
+            for j in ind:
+                res.append(self.train_y[j])
+
+            from collections import Counter
+
+            [(winner, _count)] = Counter(res).most_common(1)
+            pred[i] = winner
+        return pred
         return pred
