@@ -17,8 +17,9 @@ class TwoLayerNet:
         reg, float - L2 regularization strength
         """
         self.reg = reg
-        # TODO Create necessary layers
-        raise Exception("Not implemented!")
+        self.dense1 = FullyConnectedLayer(n_input, hidden_layer_size)
+        self.act1 = ReLULayer()
+        self.dense2 = FullyConnectedLayer(hidden_layer_size, n_output)
 
     def compute_loss_and_gradients(self, X, y):
         """
@@ -31,16 +32,28 @@ class TwoLayerNet:
         """
         # Before running forward and backward pass through the model,
         # clear parameter gradients aggregated from the previous pass
-        # TODO Set parameter gradient to zeros
+        # Set parameter gradient to zeros
         # Hint: using self.params() might be useful!
-        raise Exception("Not implemented!")
+        params = self.params()
+        for key in params.keys():
+          params[key].grad = np.zeros_like(params[key].value)
         
-        # TODO Compute loss and fill param gradients
+      
+        # Compute loss and fill param gradients
         # by running forward and backward passes through the model
-        
+        out = self.dense2.forward(self.act1.forward(self.dense1.forward(X)))
+
+        loss, grad = softmax_with_cross_entropy(out, y)
+
+        self.dense1.backward(self.act1.backward(self.dense2.backward(grad)))
+
         # After that, implement l2 regularization on all params
         # Hint: self.params() is useful again!
-        raise Exception("Not implemented!")
+
+        for key in params.keys():
+          l2_loss, l2_grad = l2_regularization(params[key].value, self.reg)
+          loss += l2_loss
+          params[key].grad += l2_grad
 
         return loss
 
@@ -54,19 +67,22 @@ class TwoLayerNet:
         Returns:
           y_pred, np.array of int (test_samples)
         """
-        # TODO: Implement predict
+        # Implement predict
         # Hint: some of the code of the compute_loss_and_gradients
         # can be reused
-        pred = np.zeros(X.shape[0], np.int)
+ 
+        out = self.dense2.forward(self.act1.forward(self.dense1.forward(X)))
 
-        raise Exception("Not implemented!")
-        return pred
+        return out.argmax(axis=1)
 
     def params(self):
         result = {}
 
-        # TODO Implement aggregating all of the params
+        result['W1'] = self.dense1.W
+        result['W2'] = self.dense2.W
 
-        raise Exception("Not implemented!")
+        result['B1'] = self.dense1.B
+        result['B2'] = self.dense2.B
+
 
         return result
