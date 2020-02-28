@@ -18,6 +18,51 @@ def l2_regularization(W, reg_strength):
     grad = 2 * reg_strength * W
     return loss, grad
 
+def softmax(predictions):
+    '''
+    Computes probabilities from scores
+
+    Arguments:
+      predictions, np array, shape is either (N) or (batch_size, N) -
+        classifier output
+
+    Returns:
+      probs, np array of the same shape as predictions - 
+        probability for every class, 0..1
+    '''
+    predictions = np.array(predictions)
+    p_dim = predictions.ndim
+    if p_dim == 1:
+      predictions = predictions[np.newaxis, :]
+    predictions -= np.max(predictions, axis=1)[:, np.newaxis]
+    
+    probs = np.exp(predictions) / np.sum(np.exp(predictions), axis=1)[:, np.newaxis]
+
+    if p_dim == 1:
+      return probs[0]
+    else:
+      return probs
+
+
+def cross_entropy_loss(probs, target_index):
+    '''
+    Computes cross-entropy loss
+
+    Arguments:
+      probs, np array, shape is either (N) or (batch_size, N) -
+        probabilities for every class
+      target_index: np array of int, shape is (1) or (batch_size) -
+        index of the true class for given sample(s)
+
+    Returns:
+      loss: single value
+    '''
+    if (type(target_index) == int):
+      loss = - np.log(probs)[target_index]
+    else:
+      loss = - np.mean(np.log(probs[range(target_index.shape[0]),target_index]))
+    
+    return loss
 
 def softmax_with_cross_entropy(preds, target_index):
     """
@@ -38,21 +83,13 @@ def softmax_with_cross_entropy(preds, target_index):
     #raise Exception("Not implemented!")
     zeros = np.zeros_like(preds)
     if preds.ndim > 1:  # batch case
-      preds -= np.max(preds, axis=1)[:, np.newaxis]
-      probs = np.exp(preds) / np.sum(np.exp(preds), axis=1)[:, np.newaxis]
-      ce = - np.mean(np.log(probs[range(target_index.shape[0]),target_index]))
       for i in range(target_index.shape[0]):
         zeros[i, target_index[i]] = 1
     else:
       zeros[target_index] = 1
-      predictions = preds[np.newaxis, :]
-      predictions -= np.max(predictions, axis=1)[:, np.newaxis]
-      probs = np.exp(predictions) / np.sum(np.exp(predictions), axis=1)[:, np.newaxis]
-      probs = probs[0] + 1e-10
-      ce = - np.mean(np.log(probs)[target_index])
 
-    loss = ce #ross_entropy_loss(softmax(preds), target_index)
-    grad = probs
+    loss = cross_entropy_loss(softmax(preds), target_index)
+    grad = softmax(preds)
     grad -= zeros
 
     if preds.ndim > 1:
